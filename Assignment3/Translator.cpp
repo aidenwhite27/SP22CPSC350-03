@@ -31,6 +31,14 @@ string Translator::translateEnglishWord(string word){
   // either call model's translateStringCharacter or translateDoubleCharacter function
   string translatedWord = "";
 
+  // UPDATE: Adapted from initial commit to account for consecutive punctuation
+  // that resulted in words that were empty strings which caused an out of
+  // range error when checking for size
+  if(word == "")
+  {
+    return "";
+  }
+
   for(int i = 0; i < word.length() - 1; i++){
     if(word.at(i) == word.at(i + 1)){
       translatedWord += model.translateDoubleCharacter(word.at(i));
@@ -41,8 +49,15 @@ string Translator::translateEnglishWord(string word){
     }
   }
 
-  if(word.at(word.length() - 1) != word.at(word.length() - 2)){
-    translatedWord += model.translateStringCharacter(word.at(word.length() - 1));
+  // UPDATE: Adapted from initial commit to account for single-letter words
+  // and avoid out of range errors
+  if(word.length() > 1){
+    if(word.at(word.length() - 1) != word.at(word.length() - 2)){
+      translatedWord += model.translateStringCharacter(word.at(word.length() - 1));
+    }
+  }
+  else{
+    translatedWord += model.translateStringCharacter(word[0]);
   }
 
   return translatedWord;
@@ -66,8 +81,11 @@ string Translator::translateEnglishSentence(string sent){
   string translatedSentence = "";
   string word = "";
   for(int i = 0; i < sent.length(); i++){
+    // UPDATE: Adapted from initial commit to include endline additional
+    // punctuation
     if(sent.at(i) == ' ' || sent.at(i) == '.' || sent.at(i) == ',' ||
-        sent.at(i) == '!' || sent.at(i) == '?'){
+        sent.at(i) == '!' || sent.at(i) == '?' || sent.at(i) == ';' ||
+        sent.at(i) == ':' || sent.at(i) == '\n'){
       translatedSentence += translateEnglishWord(word) + sent.at(i);
       word = "";
     }
