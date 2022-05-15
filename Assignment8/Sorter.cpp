@@ -7,116 +7,161 @@ CPSC 350-03 Data Structures and Algorithms
 
 #include "Sorter.h"
 #include <fstream>
-#include <iostream>
 using namespace std;
 
+// Constructor
 Sorter::Sorter(){
-
+  vector<double> nums1;
+  vector<double> nums2;
+  vector<double> nums3;
 }
 
+// Destructor
 Sorter::~Sorter(){
 
 }
 
-void Sorter::merge(SLList<double> &list, int i, int j, int k){
-  int mergedSize = k - i + 1;
-  int mergePos = 0;
-  int leftPos = 0;
-  int rightPos = 0;
-  //SLList<double> mergedNumbers(mergedSize);
-  //SLList<double> *mergedNumbers;
-  //mergedNumbers = new SLList<double>(mergedSize);
-  double *mergedNumbers = new double[mergedSize];
-  cout << "mergedNumbers created" << endl;
-  leftPos = i;
-  rightPos = j + 1;
+/*
+readFile()
+Takes a text file containing decimal numbers and stores them in the three member
+vectors of the sorter class.
+@param string fileName
+@return void
+*/
+void Sorter::readFile(string filename){
+  ifstream in_file;
+  string line;
+  double num;
 
-  while((leftPos <= j) && (rightPos <= k)){
-    cout << "while loop entered" << endl;
-    cout << "left pos:" << leftPos << "right pos:" << rightPos << endl;
-    cout << "length" << list.length() << endl;
-    if(list.getValue(leftPos) <= list.getValue(rightPos)){
-      cout << "condition checked" << endl;
-      mergedNumbers[mergePos] = list.getValue(leftPos);
-      ++leftPos;
-      cout << "if block executed" << endl;
+  in_file.open(filename);
+
+  getline(in_file, line);
+
+  while(getline(in_file, line)){
+    num = stod(line);
+    nums1.push_back(num);
+    nums2.push_back(num);
+    nums3.push_back(num);
+  }
+
+  in_file.close();
+}
+
+/*
+merge()
+Used by the mergeSort() function to temporarily store numbers in smaller vectors,
+then combine them in order back into the original complete vector.
+@param vector<double> &nums: reference to the complete unsorted vector
+@param int s: starting index of sort
+@param int m: middle index that divides left and right sides
+@param int e: last index to be sorted
+@return void
+*/
+void Sorter::merge(vector<double> &nums, int s, int m, int e){
+
+  int i , j;
+  i = s;
+  j = m + 1;
+  vector<double> temp;
+
+  while(i <= m && j <= e){ // while both left and right vectors have numbers remaining,
+    if(nums[i] <= nums[j]){ // push them to the temporary vector in ascending order
+      temp.push_back(nums[i]);
+      ++i;
     }
     else{
-      cout << "else block entered" << endl;
-      mergedNumbers[mergePos] = list.getValue(rightPos);
-      ++rightPos;
-      cout << "else block executed" << endl;
+      temp.push_back(nums[j]);
+      ++j;
     }
-    ++mergePos;
   }
 
-  while(leftPos <= j){
-    mergedNumbers[mergePos] = list.getValue(leftPos);
-    ++leftPos;
-    ++mergePos;
+  while(i <= m){ // finish pushing numbers from left if necessary
+    temp.push_back(nums[i]);
+    ++i;
   }
 
-  while(rightPos <= k){
-    mergedNumbers[mergePos] = list.getValue(rightPos);
-    ++rightPos;
-    ++mergePos;
+  while(j <= e){ // finish pushing numbers from right if necessary
+    temp.push_back(nums[j]);
+    ++j;
   }
 
-  //list.clear();
-  for(mergePos = 0; mergePos < mergedSize; ++mergePos){
-    cout << "copy loop entered" << endl;
-    //numbers[i + mergePos] = mergedNumbers[mergePos];
-    //list.append(mergedNumbers->getValue(mergePos));
-    //list.append(mergedNumbers[mergePos]);
-    list.moveToPos(i + mergePos);
-    list.insert(mergedNumbers[mergePos]);
+  for(int i = s; i <= e; ++i){ // write from temporary array to original
+    nums[i] = temp[i-s];
   }
 }
 
 /*
-processFile()
-Takes a text file containing English text and writes to an output file the
-equivalent Tutnese text by calling Translator.translateEnglishSentence() on
-each line.
-@param string inputName, string outputName
+mergeSort()
+Makes recursive calls which divide the numbers vector into smaller and smaller
+vectors until they reach size 1, which is sorted by definition. Then, calls
+the merge function to combine the small vectors into the original vector in order.
+@param vector<double> &nums: reference to the complete unsorted vector
+@param int s: starting index of sort
+@param int e: last index to be sorted
 @return void
 */
-void Sorter::mergeSort(SLList<double> &list, int i, int k){
-  int j = 0;
-  cout << "mergeSort called" << endl;
-  if (i < k) {
-    j = (i + k) / 2;
+void Sorter::mergeSort(vector<double> &nums, int s, int e){
 
-    mergeSort(list, i, j);
-    mergeSort(list, j + 1, k);
+  if (s < e) {
+    int m = (s + e) / 2;
 
-    merge(list, i, j, k);
-    cout << "merge called" << endl;
+    mergeSort(nums, s, m);
+    mergeSort(nums, m + 1, e);
+
+    merge(nums, s, m, e);
   }
 }
 
-void Sorter::selectionSort(SLList<double> &list){
+/*
+selectionSort()
+Finds the maximum value of the unsorted vector and swaps it with the last value.
+Then, decrements the size of the unsorted vector and repeats, until index 0
+is reached and the vector has been sorted.
+@param vector<double> &nums: reference to the complete unsorted vector
+@param int n: size of the vector
+@return void
+*/
+void Sorter::selectionSort(vector<double> &nums, int n){
 
-  int lastUnsorted = list.length(); //set last unsorted to one past last value
+  int lastUnsorted = n - 1; //set last unsorted to index of last value
 
-  for(list.moveToStart(); list.currPos() < lastUnsorted; lastUnsorted--){
-    double max = list.getValue(); //set max to first value
-    int maxPos = list.currPos(); //set maxPos for removal later
+  for(int i = 0; i <= lastUnsorted; lastUnsorted--){
+    double max = nums[i]; //set max to first value
+    int maxPos = i; //set maxPos for swap later
 
-    for(list.moveToStart(); list.currPos() < lastUnsorted; list.next()){
-      if(list.getValue() > max){ //if current value is greater than max, set max to it
-        max = list.getValue();
-        maxPos = list.currPos();
+    for(int j = 0; j <= lastUnsorted; j++){
+      if(nums[j] > max){ //if current value is greater than max, set max to it
+        max = nums[j];
+        maxPos = j;
       }
     }
-
-    list.insert(max); //insert max at lastUnsorted
-    list.moveToPos(maxPos);
-    list.remove(); //remove max from previous location
-    list.moveToStart();
+    //swap max with the last unsorted value
+    nums[maxPos] = nums[lastUnsorted];
+    nums[lastUnsorted] = max;
   }
 }
 
-void Sorter::thirdSort(){
+/*
+insertionSort()
+Starts at index 1 and compares value with previous values, swapping one by one
+until they are in order. Then increments index and repeats.
+@param vector<double> &nums: reference to the complete unsorted vector
+@param int n: size of vector
+@return void
+*/
+void Sorter::insertionSort(vector<double> &nums, int n){
 
+  int i, j;
+  i = j = 0;
+  double temp = 0;
+
+  for(i = 1; i < n; i++){ //sort values starting at index 1
+    j = i;
+    while(j > 0  && nums[j] < nums[j - 1]){ //compare value with previous value
+      temp = nums[j];
+      nums[j] = nums[j - 1];
+      nums[j - 1] = temp;
+      j--;
+    }
+  }
 }

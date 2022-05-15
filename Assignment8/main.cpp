@@ -1,48 +1,51 @@
+/*
+@file main.cpp
+@Brief: This is the main function of the sorting program.
+@Author: Aiden White
+CPSC 350-03 Data Structures and Algorithms
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "SLList.h"
 #include "Sorter.h"
+#include <vector>
+#include <ctime>
 
 using namespace std;
 
 int main() {
-  ifstream in_file;
-  string firstline;
-  string line;
-  int n;
-  double num;
-
-  in_file.open("1k.txt");
-
-  getline(in_file, firstline);
-  n = stoi(firstline);
-
-  SLList<double> list1(n);
-  SLList<double> list2(n);
-
-  while(getline(in_file, line)){
-    num = stod(line);
-    //list1.append(num);
-    list2.append(num);
-  }
-  in_file.close();
-
-  //cout << list1.length() << endl;
+  string filename;
   Sorter s;
-  //s.selectionSort(list1);
-  cout << "list2 length:" << list2.length() << endl;
-  s.mergeSort(list2, 0, list2.length() - 1);
+  cout << "Please enter name of file to sort: " << endl;
+  cin >> filename;
+  cout << endl;
 
-  // for(list1.moveToStart(); list1.currPos() < list1.length(); list1.next()){
-  //   double item = list1.getValue();
-  //   cout << item << endl;
-  // }
+  s.readFile(filename);
 
-  for(list2.moveToStart(); list2.currPos() < list2.length(); list2.next()){
-    double item = list2.getValue();
-    cout << item << endl;
-  }
+  // Merge Sort
+  time_t startTime = time(nullptr);
+  s.mergeSort(s.nums2, 0, s.nums2.size() - 1);
+  time_t endTime = time(nullptr);
+  cout << "Merge Sort: " << endl;
+  cout << "Time started: " << ctime(&startTime);
+  cout << "Time ended: " << ctime(&endTime) << endl;
+
+  // Selection Sort
+  startTime = time(nullptr);
+  s.selectionSort(s.nums1, s.nums1.size());
+  endTime = time(nullptr);
+  cout << "Selection Sort: " << endl;
+  cout << "Time started: " << ctime(&startTime);
+  cout << "Time ended: " << ctime(&endTime) << endl;
+
+  // Insertion Sort
+  startTime = time(nullptr);
+  s.insertionSort(s.nums3, s.nums3.size());
+  endTime = time(nullptr);
+  cout << "Insertion Sort: " << endl;
+  cout << "Time started: " << ctime(&startTime);
+  cout << "Time ended: " << ctime(&endTime) << endl;
 
   return 0;
 }
